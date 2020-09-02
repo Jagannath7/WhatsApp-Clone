@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:text="Welcome to WhatsApp"
-
         android:textColor="#21DD29"
         android:textSize="28sp"
         android:textStyle="bold" />
@@ -72,9 +71,7 @@
             android:singleLine="true"
             android:textSize="20sp" />
 
-
     </LinearLayout>
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/nextBtn"
