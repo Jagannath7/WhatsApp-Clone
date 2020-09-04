@@ -10,7 +10,13 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.android.synthetic.main.activity_o_t_p.*
+import java.util.concurrent.TimeUnit
 
 
 const val PHONE_NUMBER = "phoneNumber"
@@ -18,12 +24,26 @@ const val PHONE_NUMBER = "phoneNumber"
 
 class OTPActivity : AppCompatActivity() {
 
-    var phoneNumber:String? = null
+    lateinit var callbacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks
+    var phoneNumber: String? = null
+    var mVerficationCode: String? = null
+    var mResendCode: PhoneAuthProvider.ForceResendingToken? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_o_t_p)
         initViews()
+        startVerification()
+
+    }
+
+    private fun startVerification() {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+            phoneNumber!!, // Phone number to verify
+            60, // Timeout duration
+            TimeUnit.SECONDS, // Unit of timeout
+            this, // Activity (for callback binding)
+            callbacks) // OnVerificationStateChangedCallbacks
         showCountDownTimer(60000)
     }
 
@@ -36,6 +56,7 @@ class OTPActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
+                counterTv.text = ""
                 resendBtn.isEnabled = true
             }
         }.start()
@@ -45,6 +66,38 @@ class OTPActivity : AppCompatActivity() {
         phoneNumber = intent.getStringExtra(PHONE_NUMBER)
         verifyTv.text = getString(R.string.verfiy_number, phoneNumber)
         setSpannableString()
+
+        callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+            override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+
+
+                val smsCode = credential.smsCode
+                if(!smsCode.isNullOrBlank()) {
+                    sentcodeEt.setText(smsCode)
+                }
+//                signInWithPhoneAuthCredential(credential)
+            }
+
+            override fun onVerificationFailed(e: FirebaseException) {
+
+                if (e is FirebaseAuthInvalidCredentialsException) {
+
+                } else if (e is FirebaseTooManyRequestsException) {
+
+                }
+
+            }
+
+            override fun onCodeSent(
+                verificationId: String,
+                token: PhoneAuthProvider.ForceResendingToken
+            ) {
+                mVerficationCode = verificationId
+                mResendCode = token
+
+            }
+        }
     }
 
     private fun setSpannableString() {
