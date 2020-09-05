@@ -30,7 +30,7 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var callbacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks
     var phoneNumber: String? = null
-    var mVerficationCode: String? = null
+    var mVerificationCode: String? = null
     var mResendCode: PhoneAuthProvider.ForceResendingToken? = null
     private lateinit var progressDialog: ProgressDialog
     private var mCounterDown : CountDownTimer? = null
@@ -45,11 +45,12 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun startVerification() {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-            phoneNumber!!, // Phone number to verify
-            60, // Timeout duration
-            TimeUnit.SECONDS, // Unit of timeout
-            this, // Activity (for callback binding)
-            callbacks) // OnVerificationStateChangedCallbacks
+            phoneNumber!!,
+            60,
+            TimeUnit.SECONDS,
+            this,
+            callbacks,
+        )
         showCountDownTimer(60000)
         progressDialog = createProgressDialog("sending a verification code", false)
         progressDialog.show()
@@ -116,7 +117,7 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
                 verificationId: String,
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
-                mVerficationCode = verificationId
+                mVerificationCode = verificationId
                 mResendCode = token
 
             }
@@ -129,7 +130,9 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
         mAuth.signInWithCredential(credential)
             .addOnCompleteListener {
                 if(it.isSuccessful){
-
+                    startActivity(
+                        Intent(this, SignUpActivity::class.java)
+                    )
                 }else{
                     notifyUserAndRetry("Your Phone Number Verification is failed.Retry again!")
                 }
@@ -181,15 +184,17 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
         when(v){
             verificationBtn -> {
                 val code = sentcodeEt.text.toString()
-                if(code.isNotEmpty() && !mVerficationCode.isNullOrEmpty()){
+                if(code.isNotEmpty() && !mVerificationCode.isNullOrEmpty()){
 
                     progressDialog = createProgressDialog("Please Wait", false)
                     progressDialog.show()
 
-                    val credential = PhoneAuthProvider.getCredential(mVerficationCode!!, code)
+                    val credential = PhoneAuthProvider.getCredential(mVerificationCode!!, code)
                     signInWithPhoneAuthCredential(credential)
+                    
                 }
             }
+
             resendBtn -> {
 
                 val code = sentcodeEt.text.toString()
@@ -200,10 +205,10 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
                     progressDialog.show()
 
                     PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                        phoneNumber!!, // Phone number to verify
-                        60, // Timeout duration
-                        TimeUnit.SECONDS, // Unit of timeout
-                        this, // Activity (for callback binding)
+                        phoneNumber!!,
+                        60,
+                        TimeUnit.SECONDS,
+                        this,
                         callbacks,
                         mResendCode
                     )
