@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_sign_up.*
@@ -51,7 +52,7 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this, "Image cannot be empty", Toast.LENGTH_LONG).show()
             }else{
                 val user = User(name,downloadUrl,downloadUrl,auth.uid!!)
-                database.collection("users").document(auth.uid!!).set(user).addOnSuccessListener {
+                database.collection("users").document(auth.uid!!).set(user, SetOptions.merge()).addOnSuccessListener {
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                     finish()
