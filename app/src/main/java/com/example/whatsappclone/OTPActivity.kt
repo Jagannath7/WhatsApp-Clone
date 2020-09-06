@@ -52,7 +52,7 @@ class OTPActivity : AppCompatActivity(), View.OnClickListener {
             callbacks,
         )
         showCountDownTimer(60000)
-        progressDialog = createProgressDialog("sending a verification code", false)
+        progressDialog = createProgressDialog("sending a verification code", true)
         progressDialog.show()
     }
 
