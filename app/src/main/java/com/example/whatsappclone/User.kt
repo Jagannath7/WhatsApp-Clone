@@ -13,7 +13,7 @@ data class User(
 
 ) {
 
-    constructor() : this("", "", "", "", "", "", "")
+    constructor() : this("", "", "", "", "", "", false)
 
     constructor(name: String, imageUrl: String, thumbImg: String, uid: String) : this(
         name,
