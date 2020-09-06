@@ -3,15 +3,16 @@ package com.example.whatsappclone
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_sign_up.*
@@ -27,6 +28,10 @@ class SignUpActivity : AppCompatActivity() {
         FirebaseAuth.getInstance()
     }
 
+    val database by lazy{
+        FirebaseFirestore.getInstance()
+    }
+
     private lateinit var downloadUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +40,25 @@ class SignUpActivity : AppCompatActivity() {
 
         userImgView.setOnClickListener {
             checkForImagePermission()
+        }
+
+        nextBtn.setOnClickListener {
+            nextBtn.isEnabled = false
+            val name = nameEt.text.toString()
+            if(name.isEmpty()){
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_LONG).show()
+            }else if(!::downloadUrl.isInitialized){
+                Toast.makeText(this, "Image cannot be empty", Toast.LENGTH_LONG).show()
+            }else{
+                val user = User(name,downloadUrl,downloadUrl,auth.uid!!)
+                database.collection("users").document(auth.uid!!).set(user).addOnSuccessListener {
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }.addOnFailureListener {
+                    nextBtn.isEnabled = true
+                }
+            }
         }
     }
 
