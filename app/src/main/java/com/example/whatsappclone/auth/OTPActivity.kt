@@ -1,4 +1,4 @@
-package com.example.whatsappclone
+package com.example.whatsappclone.auth
 
 import android.app.ProgressDialog
 import android.content.Context
@@ -12,6 +12,7 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
+import com.example.whatsappclone.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException

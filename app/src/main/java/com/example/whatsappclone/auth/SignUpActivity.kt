@@ -1,4 +1,4 @@
-package com.example.whatsappclone
+package com.example.whatsappclone.auth
 
 import android.Manifest
 import android.app.Activity
@@ -9,6 +9,9 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import com.example.whatsappclone.MainActivity
+import com.example.whatsappclone.R
+import com.example.whatsappclone.models.User
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth

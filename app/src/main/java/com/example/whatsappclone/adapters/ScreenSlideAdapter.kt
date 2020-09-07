@@ -1,8 +1,10 @@
-package com.example.whatsappclone
+package com.example.whatsappclone.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.whatsappclone.fragments.InboxFragment
+import com.example.whatsappclone.fragments.PeopleFragment
 
 class ScreenSlideAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
     override fun getItemCount(): Int = 2
