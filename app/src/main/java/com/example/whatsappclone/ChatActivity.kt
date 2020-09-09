@@ -2,6 +2,7 @@ package com.example.whatsappclone
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.whatsappclone.models.Message
 import com.example.whatsappclone.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -10,6 +11,7 @@ import com.squareup.picasso.Picasso
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.google.GoogleEmojiProvider
 import kotlinx.android.synthetic.main.activity_chat.*
+import java.util.*
 
 const val UID = "uid"
 const val NAME = "name"
@@ -51,5 +53,36 @@ class ChatActivity : AppCompatActivity() {
         nameTv.text = name
         Picasso.get().load(image).into(userImgView)
 
+        sendBtn.setOnClickListener {
+            msgEdtv.text?.let{
+                if(it.isNotEmpty()){
+                    sendMessage(it.toString())
+                    it.clear()
+                }
+            }
+        }
+
+    }
+
+    private fun sendMessage(msg: String) {
+        val id = getMessages(friendId!!).push().key
+        checkNotNull(id){"Cannot Be Null"}
+        val msgMap = Message(msg, mCurrentUid,id)
+        getMessages(friendId!!).child(id).setValue(msgMap).addOnSuccessListener {
+
+        }
+    }
+
+    private fun getMessages(friendId: String) = db.reference.child("message/${getId(friendId)}")
+
+    private fun getInbox(toUser: String, fromUser: String) =
+        db.reference.child("chats/$toUser/$fromUser")
+
+    private fun getId(friendId: String): String{
+        return if(friendId>mCurrentUid){
+            mCurrentUid+friendId
+        }else{
+            friendId+mCurrentUid
+        }
     }
 }
