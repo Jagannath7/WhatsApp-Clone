@@ -12,7 +12,7 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <style name="ChatShapeApperance">
+    <style name="ChatShapeAppearance">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">22dp</item>
         <item name="cornerSizeBottomLeft">22dp</item>
