@@ -41,7 +41,7 @@
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            tools:text="Pulkit Aggarwal" />
+            tools:text="Code Stinger" />
     </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
