@@ -1,7 +1,8 @@
-package com.example.whatsappclone
+package com.example.whatsappclone.fragments
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.example.whatsappclone.R
 import com.example.whatsappclone.models.User
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item.view.*
