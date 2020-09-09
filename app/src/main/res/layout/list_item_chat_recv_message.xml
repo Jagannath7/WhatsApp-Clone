@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:textColor="#858585"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="12:00 AM" />
         </com.google.android.flexbox.FlexboxLayout>
     </com.google.android.material.card.MaterialCardView>
