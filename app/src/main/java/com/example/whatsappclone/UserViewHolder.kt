@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.list_item.view.*
 
 class UserViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-    fun bind(user: User) = with(itemView){
+    fun bind(user: User, onClick: (name: String, photo: String, id: String)-> Unit) = with(itemView){
 
         countTv.isInvisible()
         timeTv.isInvisible()
@@ -22,7 +22,12 @@ class UserViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             .placeholder(R.drawable.defaultavatar)
             .error(R.drawable.defaultavatar)
             .into(userImgView)
+
+        setOnClickListener {
+            onClick.invoke(user.name, user.thumbImg, user.uid)
+        }
     }
+
 
     fun View.isInvisible(): Boolean {
         return this.visibility == View.INVISIBLE
