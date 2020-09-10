@@ -84,8 +84,6 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
-
-
         listenToMessages()
 
         sendBtn.setOnClickListener {
@@ -96,9 +94,30 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
         }
-
+        updateReadCount()
     }
 
+    private fun updateReadCount() {
+        getInbox(mCurrentUid, friendId!!).child("count").setValue(0)
+    }
+
+    private fun addMessage(msg: Message) {
+        val eventBefore = messages.lastOrNull()
+
+        if (eventBefore != null && !eventBefore.sentAt.isSameDayAs(msg.sentAt) || eventBefore == null) {
+            messages.add(
+                DateHeader(
+                    msg.sentAt, context = this
+                )
+            )
+        }
+        messages.add(msg)
+
+        chatAdapter.notifyItemInserted(messages.size - 1)
+        msgRv.scrollToPosition(messages.size - 1)
+
+
+    }
     private fun listenToMessages() {
         getMessages(friendId!!)
             .orderByKey()
@@ -125,24 +144,6 @@ class ChatActivity : AppCompatActivity() {
                 }
 
             })
-    }
-
-    private fun addMessage(msg: Message) {
-        val eventBefore = messages.lastOrNull()
-
-        if (eventBefore != null && !eventBefore.sentAt.isSameDayAs(msg.sentAt) || eventBefore == null) {
-            messages.add(
-                DateHeader(
-                    msg.sentAt, context = this
-                )
-            )
-        }
-        messages.add(msg)
-
-        chatAdapter.notifyItemInserted(messages.size - 1)
-        msgRv.scrollToPosition(messages.size - 1)
-
-
     }
 
     private fun sendMessage(msg: String) {
