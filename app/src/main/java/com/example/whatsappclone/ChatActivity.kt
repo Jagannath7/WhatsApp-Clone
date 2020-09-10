@@ -2,10 +2,14 @@ package com.example.whatsappclone
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.whatsappclone.models.Inbox
 import com.example.whatsappclone.models.Message
 import com.example.whatsappclone.models.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import com.vanniktech.emoji.EmojiManager
@@ -71,6 +75,45 @@ class ChatActivity : AppCompatActivity() {
         getMessages(friendId!!).child(id).setValue(msgMap).addOnSuccessListener {
 
         }
+        updateLastMessage(msgMap)
+    }
+
+    private fun updateLastMessage(message: Message) {
+        val inboxMap = Inbox(
+            message.msg,
+            friendId!!,
+            name!!,
+            image!!,
+            count = 0
+        )
+        getInbox(mCurrentUid, friendId!!).setValue(inboxMap).addOnSuccessListener {
+            getInbox(friendId!!, mCurrentUid).addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                   val value = snapshot.getValue(Inbox::class.java)
+
+                    inboxMap.apply {
+                        from = message.senderId
+                        name = currentUser.name
+                        image = currentUser.thumbImg
+                        count = 1
+                    }
+                    value?.let{
+                        if(it.from == message.senderId){
+                            inboxMap.count = value.count + 1
+                        }
+                    }
+
+                    getInbox(friendId!!, mCurrentUid).setValue(inboxMap)
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+
+            })
+        }
+    }
+
+    private fun markAsRead(){
+        getInbox(friendId!!, mCurrentUid).child("count").setValue(0)
     }
 
     private fun getMessages(friendId: String) = db.reference.child("message/${getId(friendId)}")
