@@ -2,14 +2,13 @@ package com.example.whatsappclone
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.whatsappclone.models.Inbox
-import com.example.whatsappclone.models.Message
-import com.example.whatsappclone.models.User
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.whatsappclone.adapters.ChatAdapter
+import com.example.whatsappclone.models.*
+import com.example.whatsappclone.utils.isSameDayAs
+import com.google.api.Distribution
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import com.vanniktech.emoji.EmojiManager
@@ -45,6 +44,10 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var currentUser: User
 
+    private val messages = mutableListOf<ChatEvent>()
+
+    lateinit var chatAdapter: ChatAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EmojiManager.install(GoogleEmojiProvider())
@@ -54,8 +57,16 @@ class ChatActivity : AppCompatActivity() {
             currentUser = it.toObject(User::class.java)!!
         }
 
+        chatAdapter = ChatAdapter(messages, mCurrentUid)
+        msgRv.apply {
+            layoutManager = LinearLayoutManager(this@ChatActivity)
+            adapter = chatAdapter
+        }
+
         nameTv.text = name
         Picasso.get().load(image).into(userImgView)
+
+        listenToMessages()
 
         sendBtn.setOnClickListener {
             msgEdtv.text?.let{
@@ -65,6 +76,52 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
         }
+
+    }
+
+    private fun listenToMessages(){
+        getMessages(friendId!!)
+            .orderByKey()
+            .addChildEventListener(object : ChildEventListener{
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val msg = snapshot.getValue(Message::class.java)!!
+                    addMessage(msg)
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
+    }
+
+    private fun addMessage(msg: Message) {
+        val eventBefore = messages.lastOrNull()
+
+        if(eventBefore != null && !eventBefore.sentAt.isSameDayAs(msg.sentAt) || eventBefore == null){
+            messages.add(
+                DateHeader(
+                    msg.sentAt, context = this
+                )
+            )
+        }
+        messages.add(msg)
+
+        chatAdapter.notifyItemInserted(messages.size - 1)
+        msgRv.scrollToPosition(messages.size - 1)
+
 
     }
 
