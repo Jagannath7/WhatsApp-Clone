@@ -1,12 +1,12 @@
 package com.example.whatsappclone
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.whatsappclone.adapters.ChatAdapter
 import com.example.whatsappclone.models.*
 import com.example.whatsappclone.utils.isSameDayAs
-import com.google.api.Distribution
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,7 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 
 const val UID = "uid"
 const val NAME = "name"
@@ -27,7 +26,7 @@ const val IMAGE = "photo"
 
 class ChatActivity : AppCompatActivity() {
 
-    private val friendId by lazy{
+    private val friendId by lazy {
         intent.getStringExtra(UID)
     }
 
@@ -39,11 +38,11 @@ class ChatActivity : AppCompatActivity() {
         intent.getStringExtra(IMAGE)
     }
 
-    private val mCurrentUid by lazy{
+    private val mCurrentUid by lazy {
         FirebaseAuth.getInstance().uid!!
     }
 
-    private val db by lazy{
+    private val db by lazy {
         FirebaseDatabase.getInstance()
     }
 
@@ -58,9 +57,10 @@ class ChatActivity : AppCompatActivity() {
         EmojiManager.install(GoogleEmojiProvider())
         setContentView(R.layout.activity_chat)
 
-        FirebaseFirestore.getInstance().collection("users").document(mCurrentUid).get().addOnSuccessListener {
-            currentUser = it.toObject(User::class.java)!!
-        }
+        FirebaseFirestore.getInstance().collection("users").document(mCurrentUid).get()
+            .addOnSuccessListener {
+                currentUser = it.toObject(User::class.java)!!
+            }
 
         chatAdapter = ChatAdapter(messages, mCurrentUid)
         msgRv.apply {
@@ -89,8 +89,8 @@ class ChatActivity : AppCompatActivity() {
         listenToMessages()
 
         sendBtn.setOnClickListener {
-            msgEdtv.text?.let{
-                if(it.isNotEmpty()){
+            msgEdtv.text?.let {
+                if (it.isNotEmpty()) {
                     sendMessage(it.toString())
                     it.clear()
                 }
@@ -99,10 +99,10 @@ class ChatActivity : AppCompatActivity() {
 
     }
 
-    private fun listenToMessages(){
+    private fun listenToMessages() {
         getMessages(friendId!!)
             .orderByKey()
-            .addChildEventListener(object : ChildEventListener{
+            .addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val msg = snapshot.getValue(Message::class.java)!!
                     addMessage(msg)
@@ -130,7 +130,7 @@ class ChatActivity : AppCompatActivity() {
     private fun addMessage(msg: Message) {
         val eventBefore = messages.lastOrNull()
 
-        if(eventBefore != null && !eventBefore.sentAt.isSameDayAs(msg.sentAt) || eventBefore == null){
+        if (eventBefore != null && !eventBefore.sentAt.isSameDayAs(msg.sentAt) || eventBefore == null) {
             messages.add(
                 DateHeader(
                     msg.sentAt, context = this
@@ -147,8 +147,8 @@ class ChatActivity : AppCompatActivity() {
 
     private fun sendMessage(msg: String) {
         val id = getMessages(friendId!!).push().key
-        checkNotNull(id){"Cannot Be Null"}
-        val msgMap = Message(msg, mCurrentUid,id)
+        checkNotNull(id) { "Cannot Be Null" }
+        val msgMap = Message(msg, mCurrentUid, id)
         getMessages(friendId!!).child(id).setValue(msgMap).addOnSuccessListener {
 
         }
@@ -164,9 +164,10 @@ class ChatActivity : AppCompatActivity() {
             count = 0
         )
         getInbox(mCurrentUid, friendId!!).setValue(inboxMap).addOnSuccessListener {
-            getInbox(friendId!!, mCurrentUid).addListenerForSingleValueEvent(object : ValueEventListener{
+            getInbox(friendId!!, mCurrentUid).addListenerForSingleValueEvent(object :
+                ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                   val value = snapshot.getValue(Inbox::class.java)
+                    val value = snapshot.getValue(Inbox::class.java)
 
                     inboxMap.apply {
                         from = message.senderId
@@ -174,8 +175,8 @@ class ChatActivity : AppCompatActivity() {
                         image = currentUser.thumbImg
                         count = 1
                     }
-                    value?.let{
-                        if(it.from == message.senderId){
+                    value?.let {
+                        if (it.from == message.senderId) {
                             inboxMap.count = value.count + 1
                         }
                     }
@@ -189,7 +190,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun markAsRead(){
+    private fun markAsRead() {
         getInbox(friendId!!, mCurrentUid).child("count").setValue(0)
     }
 
@@ -198,11 +199,24 @@ class ChatActivity : AppCompatActivity() {
     private fun getInbox(toUser: String, fromUser: String) =
         db.reference.child("chats/$toUser/$fromUser")
 
-    private fun getId(friendId: String): String{
-        return if(friendId>mCurrentUid){
-            mCurrentUid+friendId
-        }else{
-            friendId+mCurrentUid
+    private fun getId(friendId: String): String {
+        return if (friendId > mCurrentUid) {
+            mCurrentUid + friendId
+        } else {
+            friendId + mCurrentUid
+        }
+    }
+
+
+    companion object {
+
+        fun createChatActivity(context: android.content.Context, id: String, name: String, image: String): Intent {
+            val intent = Intent(context, ChatActivity::class.java)
+            intent.putExtra(UID, id)
+            intent.putExtra(NAME, name)
+            intent.putExtra(IMAGE, image)
+
+            return intent
         }
     }
 }
